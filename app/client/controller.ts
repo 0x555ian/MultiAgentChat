@@ -1,4 +1,7 @@
-// To store message streaming controller
+import { UnifiedRouter } from "../utils/router";
+
+const router = new UnifiedRouter();
+
 export const ChatControllerPool = {
   controllers: {} as Record<string, AbortController>,
 
@@ -35,3 +38,23 @@ export const ChatControllerPool = {
     return `${sessionId},${messageIndex}`;
   },
 };
+
+export function createEmptyMask(): Mask {
+  return {
+    id: nanoid(),
+    name: "",
+    avatar: "default",
+    context: [],
+    syncGlobalConfig: true,
+    modelConfig: {
+      ...DEFAULT_MODEL_CONFIG,
+    },
+    lang: "en",
+    builtin: false,
+    createdAt: Date.now(),
+  };
+}
+
+export async function getChatApi(modelName: string) {
+  return router.route(modelName);
+}

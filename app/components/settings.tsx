@@ -1319,6 +1319,27 @@ export function Settings() {
       </ListItem>
     </>
   );
+  const elizaConfigComponent = accessStore.provider ===
+    ServiceProvider.Eliza && (
+    <>
+      <ListItem
+        title={Locale.Settings.Access.Eliza.Endpoint.Title}
+        subTitle={Locale.Settings.Access.Eliza.Endpoint.SubTitle}
+      >
+        <input
+          type="text"
+          value={accessStore.elizaUrl}
+          placeholder="http://0.0.0.0:8000"
+          onChange={(e) =>
+            accessStore.update(
+              (access) => (access.elizaUrl = e.currentTarget.value),
+            )
+          }
+        />
+      </ListItem>
+    </>
+  );
+
   const siliconflowConfigComponent = accessStore.provider ===
     ServiceProvider.SiliconFlow && (
     <>

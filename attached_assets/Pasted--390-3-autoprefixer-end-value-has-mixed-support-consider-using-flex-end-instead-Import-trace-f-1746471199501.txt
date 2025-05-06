@@ -1,0 +1,74 @@
+(390:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+Import trace for requested module:
+./app/components/chat.module.scss
+./app/components/mask.tsx
+./app/components/home.tsx
+ ⚠ ./node_modules/rt-client/dist/esm/index.js
+Module not found: Can't resolve 'bufferutil' in '/home/runner/workspace/node_modules/rt-client/dist/esm'
+
+Import trace for requested module:
+./node_modules/rt-client/dist/esm/index.js
+./app/components/realtime-chat/realtime-chat.tsx
+./app/components/realtime-chat/index.ts
+./app/components/chat.tsx
+./app/components/home.tsx
+
+./node_modules/rt-client/dist/esm/index.js
+Module not found: Can't resolve 'utf-8-validate' in '/home/runner/workspace/node_modules/rt-client/dist/esm'
+
+Import trace for requested module:
+./node_modules/rt-client/dist/esm/index.js
+./app/components/realtime-chat/realtime-chat.tsx
+./app/components/realtime-chat/index.ts
+./app/components/chat.tsx
+./app/components/home.tsx
+
+./app/components/chat.module.scss
+Warning
+
+(390:3) autoprefixer: end value has mixed support, consider using flex-end instead
+
+Import trace for requested module:
+./app/components/chat.module.scss
+./app/components/mask.tsx
+./app/components/home.tsx
+ ⨯ ./app/constant.ts
+Error: 
+  × Expression expected
+     ╭─[/home/runner/workspace/app/constant.ts:843:1]
+ 843 │   "https://dav.idrivesync.com",
+ 844 │   "https://webdav.yandex.com",
+ 845 │   "https://app.koofr.net/dav/Koofr",
+ 846 │ ];
+     · ─
+ 847 │ 
+ 848 │ export const DEFAULT_GA_ID = "G-89WN60ZK2E";
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/constant.ts
+./app/components/home.tsx
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./app/constant.ts
+Error: 
+  × Expression expected
+     ╭─[/home/runner/workspace/app/constant.ts:843:1]
+ 843 │   "https://dav.idrivesync.com",
+ 844 │   "https://webdav.yandex.com",
+ 845 │   "https://app.koofr.net/dav/Koofr",
+ 846 │ ];
+     · ─
+ 847 │ 
+ 848 │ export const DEFAULT_GA_ID = "G-89WN60ZK2E";
+     ╰────
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./app/constant.ts
+./app/components/home.tsx

@@ -130,6 +130,7 @@ export enum ServiceProvider {
   ChatGLM = "ChatGLM",
   DeepSeek = "DeepSeek",
   SiliconFlow = "SiliconFlow",
+  ElizaOS = "ElizaOS",
 }
 
 // Google API safety settings, see https://ai.google.dev/gemini-api/docs/safety-settings
@@ -156,6 +157,7 @@ export enum ModelProvider {
   ChatGLM = "ChatGLM",
   DeepSeek = "DeepSeek",
   SiliconFlow = "SiliconFlow",
+  Eliza = "eliza",
 }
 
 export const Stability = {
@@ -380,7 +382,7 @@ You are an AI assistant with access to system tools. Your role is to help users 
    \`\`\`
 
    This is wrong because the method is not tools/call.
-   
+
    \`\`\`{
   "method": "search_repositories",
   "params": {
@@ -403,9 +405,9 @@ You are an AI assistant with access to system tools. Your role is to help users 
      }
    }
    \`\`\`
-   
+
    please follow the format strictly ONLY use tools/call method!!!!!!!!!!!
-   
+
 `;
 
 export const SUMMARIZE_MODEL = "gpt-4o-mini";
@@ -832,7 +834,6 @@ export const DEFAULT_MODELS = [
 export const CHAT_PAGE_SIZE = 15;
 export const MAX_RENDER_MSG_COUNT = 45;
 
-// some famous webdav endpoints
 export const internalAllowedWebDavEndpoints = [
   "https://dav.jianguoyun.com/dav/",
   "https://dav.dropdav.com/",
