@@ -57,9 +57,10 @@ export function StorageSelector(props: {
       setSaving(true);
       setError("");
 
+      const rpcEndpoint = "https://evmrpc-testnet.0g.ai/";
       if (storageStatus.zeroG !== "connected") {
         throw new Error(
-          "0G Network unavailable - Please check your connection",
+          `0G Network unavailable - Failed to connect to RPC endpoint: ${rpcEndpoint}`,
         );
       }
 
@@ -67,7 +68,8 @@ export function StorageSelector(props: {
       const blob = new Blob([props.content], { type: "text/plain" });
       formData.append("file", blob, `chat-${Date.now()}.txt`);
 
-      const response = await fetch("/api/storage/upload", {
+      const rpcEndpointUpload = "/api/storage/upload";
+      const response = await fetch(rpcEndpointUpload, {
         method: "POST",
         body: formData,
       });
@@ -75,7 +77,7 @@ export function StorageSelector(props: {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(
-          `RPC Error (${response.status}): ${
+          `RPC Error (${response.status}) at ${rpcEndpointUpload}: ${
             data.error || response.statusText
           }`,
         );
