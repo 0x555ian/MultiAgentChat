@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IconButton } from "./button";
 import { List, ListItem, Modal, showToast } from "./ui-lib";
 import styles from "./storage-selector.module.scss";
@@ -33,10 +33,6 @@ export function StorageSelector(props: {
     "checking" | "connected" | "disconnected"
   >("checking");
 
-  useEffect(() => {
-    checkZeroGConnection();
-  }, []);
-
   const checkZeroGConnection = async () => {
     try {
       const response = await fetch("/api/storage/status");
@@ -45,6 +41,10 @@ export function StorageSelector(props: {
       setZeroGStatus("disconnected");
     }
   };
+
+  useEffect(() => {
+    checkZeroGConnection();
+  }, []);
 
   const saveToZeroG = async () => {
     try {
