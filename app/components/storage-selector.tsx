@@ -21,11 +21,23 @@ export function StorageSelector(props: {
     const checkConnections = async () => {
       try {
         const response = await fetch("/api/storage/status");
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          setError(`RPC Connection Error: ${data.error || 'Failed to connect to 0G storage'}`);
+          setStorageStatus((prev) => ({
+            ...prev,
+            zeroG: "disconnected",
+          }));
+          return;
+        }
         setStorageStatus((prev) => ({
           ...prev,
-          zeroG: response.ok ? "connected" : "disconnected",
+          zeroG: "connected",
         }));
-      } catch {
+        setError("");
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+        setError(`RPC Connection Error: ${errMsg}`);
         setStorageStatus((prev) => ({
           ...prev,
           zeroG: "disconnected",
@@ -59,9 +71,10 @@ export function StorageSelector(props: {
 
       const rpcEndpoint = "https://evmrpc-testnet.0g.ai/";
       if (storageStatus.zeroG !== "connected") {
-        throw new Error(
-          `0G Network unavailable - Failed to connect to RPC endpoint: ${rpcEndpoint}`,
+        setError(
+          `0G Network unavailable - Failed to connect to RPC endpoint: ${rpcEndpoint}. Please check your connection and try again.`
         );
+        return;
       }
 
       const formData = new FormData();
