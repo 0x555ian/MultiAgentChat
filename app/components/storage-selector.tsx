@@ -9,13 +9,36 @@ export function StorageSelector(props: {
 }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string>("");
+  const [storageStatus, setStorageStatus] = useState<{
+    local: boolean;
+    zeroG: "checking" | "connected" | "disconnected";
+  }>({
+    local: true,
+    zeroG: "checking",
+  });
+
+  useEffect(() => {
+    const checkConnections = async () => {
+      try {
+        const response = await fetch("/api/storage/status");
+        setStorageStatus((prev) => ({
+          ...prev,
+          zeroG: response.ok ? "connected" : "disconnected",
+        }));
+      } catch {
+        setStorageStatus((prev) => ({
+          ...prev,
+          zeroG: "disconnected",
+        }));
+      }
+    };
+    checkConnections();
+  }, []);
 
   const saveToLocal = async () => {
     try {
       setSaving(true);
       setError("");
-
-      // Save to localStorage with timestamp as key
       const key = `chat-content-${Date.now()}`;
       localStorage.setItem(key, props.content);
       showToast("Content saved successfully to local storage!");
@@ -29,41 +52,21 @@ export function StorageSelector(props: {
     }
   };
 
-  const [zeroGStatus, setZeroGStatus] = useState<
-    "checking" | "connected" | "disconnected"
-  >("checking");
-
-  const checkZeroGConnection = async () => {
-    try {
-      const response = await fetch("/api/storage/status");
-      setZeroGStatus(response.ok ? "connected" : "disconnected");
-    } catch {
-      setZeroGStatus("disconnected");
-    }
-  };
-
-  useEffect(() => {
-    checkZeroGConnection();
-  }, []);
-
   const saveToZeroG = async () => {
     try {
       setSaving(true);
       setError("");
 
-      await checkZeroGConnection();
-      if (zeroGStatus === "disconnected") {
+      if (storageStatus.zeroG !== "connected") {
         throw new Error(
           "0G Network unavailable - Please check your connection",
         );
       }
 
-      // Create formData with content
       const formData = new FormData();
       const blob = new Blob([props.content], { type: "text/plain" });
       formData.append("file", blob, `chat-${Date.now()}.txt`);
 
-      // Upload to 0G storage endpoint
       const response = await fetch("/api/storage/upload", {
         method: "POST",
         body: formData,
@@ -99,16 +102,18 @@ export function StorageSelector(props: {
               <IconButton
                 text={saving ? "Saving..." : "Save Local"}
                 onClick={saveToLocal}
-                disabled={saving}
+                disabled={saving || !storageStatus.local}
               />
             </ListItem>
             <ListItem title="Save to 0G Storage">
               <div className={styles["storage-status"]}>
-                <span className={styles[`status-${zeroGStatus}`]}>●</span>
+                <span className={styles[`status-${storageStatus.zeroG}`]}>
+                  ●
+                </span>
                 <IconButton
                   text={saving ? "Saving..." : "Save to 0G"}
                   onClick={saveToZeroG}
-                  disabled={saving || zeroGStatus === "disconnected"}
+                  disabled={saving || storageStatus.zeroG !== "connected"}
                 />
               </div>
             </ListItem>
