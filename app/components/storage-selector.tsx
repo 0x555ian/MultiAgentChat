@@ -98,7 +98,17 @@ export function StorageSelector(props: {
     <div className="modal-mask">
       <Modal title="Save Content" onClose={props.onClose}>
         <div className={styles["storage-selector"]}>
-          {error && <div className={styles["error-message"]}>{error}</div>}
+          {error && (
+            <div className={styles["error-message"]} style={{
+              color: 'red',
+              marginBottom: '10px',
+              padding: '8px',
+              backgroundColor: 'rgba(255,0,0,0.1)',
+              borderRadius: '4px'
+            }}>
+              {error}
+            </div>
+          )}
           <List>
             <ListItem title="Save to Local Storage">
               <IconButton
