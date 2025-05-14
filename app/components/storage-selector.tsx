@@ -20,10 +20,11 @@ export function StorageSelector(props: {
   useEffect(() => {
     const checkConnections = async () => {
       try {
+        const rpcEndpoint = "https://evmrpc-testnet.0g.ai/";
         const response = await fetch("/api/storage/status");
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          setError(`RPC Connection Error: ${data.error || 'Failed to connect to 0G storage'}`);
+          setError(`RPC Connection Error at ${rpcEndpoint}: ${data.error || 'Failed to connect to 0G storage'}`);
           setStorageStatus((prev) => ({
             ...prev,
             zeroG: "disconnected",
@@ -115,9 +116,12 @@ export function StorageSelector(props: {
             <div className={styles["error-message"]} style={{
               color: 'red',
               marginBottom: '10px',
-              padding: '8px',
+              padding: '12px',
               backgroundColor: 'rgba(255,0,0,0.1)',
-              borderRadius: '4px'
+              borderRadius: '4px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              fontSize: '14px'
             }}>
               {error}
             </div>
