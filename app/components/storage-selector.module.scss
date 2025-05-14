@@ -10,6 +10,24 @@
 
 .storage-selector {
   padding: 10px;
+
+  .storage-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-checking {
+    color: #ffd700;
+  }
+
+  .status-connected {
+    color: #4caf50;
+  }
+
+  .status-disconnected {
+    color: #f44336;
+  }
   
   .title {
     font-size: 14px;

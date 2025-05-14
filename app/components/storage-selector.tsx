@@ -29,10 +29,34 @@ export function StorageSelector(props: {
     }
   };
 
+  const [zeroGStatus, setZeroGStatus] = useState<
+    "checking" | "connected" | "disconnected"
+  >("checking");
+
+  useEffect(() => {
+    checkZeroGConnection();
+  }, []);
+
+  const checkZeroGConnection = async () => {
+    try {
+      const response = await fetch("/api/storage/status");
+      setZeroGStatus(response.ok ? "connected" : "disconnected");
+    } catch {
+      setZeroGStatus("disconnected");
+    }
+  };
+
   const saveToZeroG = async () => {
     try {
       setSaving(true);
       setError("");
+
+      await checkZeroGConnection();
+      if (zeroGStatus === "disconnected") {
+        throw new Error(
+          "0G Network unavailable - Please check your connection",
+        );
+      }
 
       // Create formData with content
       const formData = new FormData();
@@ -46,8 +70,11 @@ export function StorageSelector(props: {
       });
 
       if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
         throw new Error(
-          `Server returned ${response.status}: ${response.statusText}`,
+          `RPC Error (${response.status}): ${
+            data.error || response.statusText
+          }`,
         );
       }
 
@@ -76,11 +103,14 @@ export function StorageSelector(props: {
               />
             </ListItem>
             <ListItem title="Save to 0G Storage">
-              <IconButton
-                text={saving ? "Saving..." : "Save to 0G"}
-                onClick={saveToZeroG}
-                disabled={saving}
-              />
+              <div className={styles["storage-status"]}>
+                <span className={styles[`status-${zeroGStatus}`]}>●</span>
+                <IconButton
+                  text={saving ? "Saving..." : "Save to 0G"}
+                  onClick={saveToZeroG}
+                  disabled={saving || zeroGStatus === "disconnected"}
+                />
+              </div>
             </ListItem>
           </List>
         </div>
