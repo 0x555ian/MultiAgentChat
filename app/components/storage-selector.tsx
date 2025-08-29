@@ -1,0 +1,154 @@
+import React, { useState, useEffect } from "react";
+import { IconButton } from "./button";
+import { List, ListItem, Modal, showToast } from "./ui-lib";
+import styles from "./storage-selector.module.scss";
+
+export function StorageSelector(props: {
+  content: string;
+  onClose: () => void;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [storageStatus, setStorageStatus] = useState<{
+    local: boolean;
+    zeroG: "checking" | "connected" | "disconnected";
+  }>({
+    local: true,
+    zeroG: "checking",
+  });
+
+  useEffect(() => {
+    const checkConnections = async () => {
+      try {
+        const rpcEndpoint = "https://evmrpc-testnet.0g.ai/";
+        const response = await fetch("/api/storage/status");
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          setError(`RPC Connection Error at ${rpcEndpoint}: ${data.error || 'Failed to connect to 0G storage'}`);
+          setStorageStatus((prev) => ({
+            ...prev,
+            zeroG: "disconnected",
+          }));
+          return;
+        }
+        setStorageStatus((prev) => ({
+          ...prev,
+          zeroG: "connected",
+        }));
+        setError("");
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+        setError(`RPC Connection Error: ${errMsg}`);
+        setStorageStatus((prev) => ({
+          ...prev,
+          zeroG: "disconnected",
+        }));
+      }
+    };
+    checkConnections();
+  }, []);
+
+  const saveToLocal = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      const key = `chat-content-${Date.now()}`;
+      localStorage.setItem(key, props.content);
+      showToast("Content saved successfully to local storage!");
+      props.onClose();
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setError(`Failed to save to local storage: ${errorMsg}`);
+      showToast("Failed to save to local storage");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveToZeroG = async () => {
+    try {
+      setSaving(true);
+      setError("");
+
+      const rpcEndpoint = "https://evmrpc-testnet.0g.ai/";
+      if (storageStatus.zeroG !== "connected") {
+        setError(
+          `0G Network unavailable - Failed to connect to RPC endpoint: ${rpcEndpoint}. Please check your connection and try again.`
+        );
+        return;
+      }
+
+      const formData = new FormData();
+      const blob = new Blob([props.content], { type: "text/plain" });
+      formData.append("file", blob, `chat-${Date.now()}.txt`);
+
+      const rpcEndpointUpload = "/api/storage/upload";
+      const response = await fetch(rpcEndpointUpload, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(
+          `RPC Error (${response.status}) at ${rpcEndpointUpload}: ${
+            data.error || response.statusText
+          }`,
+        );
+      }
+
+      showToast("Content saved successfully to 0G storage!");
+      props.onClose();
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      setError(`Failed to save to 0G storage: ${errorMsg}`);
+      showToast("Failed to save to 0G storage");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="modal-mask">
+      <Modal title="Save Content" onClose={props.onClose}>
+        <div className={styles["storage-selector"]}>
+          {error && (
+            <div className={styles["error-message"]} style={{
+              color: 'red',
+              marginBottom: '10px',
+              padding: '12px',
+              backgroundColor: 'rgba(255,0,0,0.1)',
+              borderRadius: '4px',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
+          <List>
+            <ListItem title="Save to Local Storage">
+              <IconButton
+                text={saving ? "Saving..." : "Save Local"}
+                onClick={saveToLocal}
+                disabled={saving || !storageStatus.local}
+              />
+            </ListItem>
+            <ListItem title="Save to 0G Storage">
+              <div className={styles["storage-status"]}>
+                <span className={styles[`status-${storageStatus.zeroG}`]}>
+                  ●
+                </span>
+                <IconButton
+                  text={saving ? "Saving..." : "Save to 0G"}
+                  onClick={saveToZeroG}
+                  disabled={saving || storageStatus.zeroG !== "connected"}
+                />
+              </div>
+            </ListItem>
+          </List>
+        </div>
+      </Modal>
+    </div>
+  );
+}

@@ -1,0 +1,437 @@
+Multi-Agent Chatbox – MVP Specification Document
+Version: 1.5
+ Owner: Solysian Tech
+ Prepared by: Senior Software Engineering Lead
+ Last Updated: May 05, 2025
+1. Product Overview
+Objective
+To build a scalable, high-performance multi-agent conversational platform that enables seamless interactions with specialized AI agents (e.g., coder, designer, researcher, meme generator) within a responsive, intuitive interface. Each agent operates with distinct capabilities, maintains isolated conversation contexts, presents a unique UI identity, and delivers optimal performance at scale.
+Value Proposition
+For Users: A unified interface to interact with purpose-built AI agents optimized for specific tasks
+For Developers: Extensible architecture that supports agent customization and integration
+For Enterprises: Secure, scalable, and compliant AI interaction platform
+2. Core Features & Technical Requirements
+
+Core Features & Technical Requirements
+This section outlines the primary functional goals for the MVP and their associated technical behaviors.
+Multi-Agent Chat Switching: The application supports switching between different agents from the sidebar while maintaining their unique chat context and history. This is managed by a dynamic agent registry with per-agent context preservation.
+Session Persistence: Each agent has its own isolated state container ensuring chat history and user drafts remain intact across sessions.
+Rich Input Support: The chat input interface supports code snippets, markdown formatting, and image/file uploads via an advanced editor component.
+Real-Time Typing Indicator: A real-time typing indicator system is enabled using WebSocket communication, providing user feedback during AI processing or collaborative chat.
+Auto Topic Tagging & Smart Search: Conversations are classified using contextual embeddings or similar NLP techniques to allow tag-based search and filtering.
+Personalized Storage Integration: Users can optionally connect external storage services (Google Drive, Dropbox, 0G, AWS S3) through OAuth to archive or sync content.
+End-to-End Encryption: Conversations are encrypted using strong cryptographic protocols like libsodium to ensure confidentiality of chat content.
+Light/Dark UI Theme Toggle: A toggle is provided in the UI allowing users to choose their preferred visual mode, with preferences stored for persistence across sessions.
+
+Primary Capabilities
+Feature
+Technical Implementation
+Priority
+Multi-Agent Chat Switching
+Dynamic agent registry with sidebar UI and context preservation
+High
+Session Persistence
+Per-agent state containers with persistent storage
+High
+Rich Input Support
+Advanced editor for code, markdown, image uploads
+High
+Real-Time Typing Indicator
+WebSocket implementation with activity states
+Medium
+Auto Topic Tagging & Smart Search
+Vector embedding-based context classification
+Medium
+Personalized Storage Integration
+OAuth connectors for Google Drive, 0G, Dropbox, AWS
+Medium
+End-to-End Encryption
+Strong encryption using libsodium or equivalent
+High
+Light/Dark UI Theme Toggle
+Context-aware theming with user preference persistence
+Low
+
+Technical Considerations
+Agent switching requires maintaining isolated contexts without frontend reload
+Session persistence needs optimistic updates with background sync
+Rich input requires robust parsing with preview capabilities
+Rate limiting must be sophisticated to handle different agent capabilities
+Memory isolation between agents must be strictly enforced
+3. Tech Stack
+Foundational Approach
+The technology stack is guided by open-source and MIT-licensed technologies to ensure commercial viability and extensibility. Final stack decisions are delegated to the implementation team to optimize for productivity, testability, and deployment efficiency.
+General Guidelines
+Frontend
+Framework: Next.js-based interface with server-side rendering capabilities
+State Management: Lightweight state handling with Zustand or Redux based on complexity needs
+Internationalization: i18next for managing multilingual interfaces
+Component Library: Ant Design with CSS-in-JS styling via antd-style
+Real-time: WebSocket connections for typing indicators and live updates
+Backend
+Session Management: Redis-backed session store with rate-limiting logic
+Database: PostgreSQL or PlanetScale for structured data storage
+AI Integration: Programmable gateway for model communication (GPT-4, Claude, Gemini, Ollama)
+Deployment: Vercel, Docker containers, or Zeabur based on operational context
+Storage: Integration with Google Drive, AWS S3, Dropbox, and 0G decentralized storage
+3.1 Architecture Diagram
+
+ ```mermaid
+graph TD
+  subgraph Client Layer
+    A1[Agent Selector]
+    A2[Chat Interface]
+    A3[Storage Connector]
+    A4[Theme Manager]
+  end
+
+  subgraph API Gateway Layer
+    B1[Session Manager]
+    B2[Message Router]
+    B3[Storage Router]
+    B4[Agent Registry]
+  end
+
+  subgraph Service Layer
+    C1[Eliza OS Agents]
+    C2[Model Control]
+    C3[Storage Services]
+    C4[Topic Analyzer]
+  end
+
+  subgraph Persistence Layer
+    D1[Redis Cache]
+    D2[PostgreSQL DB]
+    D3[Third-party Storage]
+    D4[0G Web3 Storage]
+  end
+
+  A1 --> B4
+  A2 --> B2
+  A3 --> B3
+  A4 --> B1
+
+  B1 --> C1
+  B2 --> C2
+  B3 --> C3
+  B4 --> C4
+
+  C1 --> D1
+  C2 --> D2
+  C3 --> D3
+  C4 --> D4
+```
+
+Eliza OS Integration (Backend)
+Eliza OS will serve as the orchestration and cognitive layer behind the AI agents with these capabilities:
+Each AI agent instance backed by an Eliza OS agent with domain-specific memory and tone
+Memory persistence, reflection logic, and long-term conversation threading through Eliza's storage hooks
+Agent selection triggering session load of corresponding Eliza instance
+Eliza OS managing agent-driven decisions like knowledge base redirects and toolkit activation
+Backend connection to Eliza OS through dedicated agent invocation module (elizaAgentBridge.ts)
+Conflict resolution logic for managing multiple active agents
+4. System Modules & Functional Requirements
+4.1 Agent Management Module
+Purpose: Manages agent profiles, selection, and context handling in the UI.
+Key Components:
+Agent Selector Sidebar: Displays scrollable list of all available agents
+Agent Profile Loader: Loads agent metadata (name, icon, type, description)
+Isolated Session State: Maintains separate chat histories and drafts per agent
+Agent Hot-Load: Supports adding new agents dynamically without UI refresh
+Technical Requirements:
+Real-time agent registry updates via WebSocket
+Memory-efficient context switching
+Visual identity system for agent differentiation
+Support for agent capability discovery and filtering
+4.2 Chat Interface Module
+Purpose: Handles all chat interactions including inputs, outputs, and visual flow.
+Key Components:
+Rich Message Input: Accepts markdown, code blocks, file attachments with previews
+Typing Feedback: Real-time typing indicators for AI responses
+Scroll Manager: Auto-follows messages with manual override controls
+Local Draft Persistence: Auto-saves drafts per agent in local storage
+Message Edit Tools: Undo/redo options for user messages with edit history
+File Preview: Expandable preview blocks for images and documents
+Technical Requirements:
+Memory-efficient virtualized message rendering
+Support for multiple file formats with thumbnails
+Optimistic updates for immediate feedback
+Progressive enhancement for older browsers
+4.3 Storage Integration Module
+Purpose: Facilitates third-party and decentralized file saving options.
+Key Components:
+OAuth-based Connectors: Google Drive, Dropbox, AWS S3 integration
+Web3 Storage: 0G decentralized storage integration
+Manual & Auto Save Triggers: User-initiated and automatic content saving
+Storage Feedback Layer: Visual feedback with toast notifications
+Technical Requirements:
+Secure OAuth flow with minimal permissions
+Chunked uploads for large files
+Progress indicators for lengthy operations
+Error handling with retry mechanisms
+4.4 Conversation History Module
+Purpose: Manages long-term storage, searchability, and lifecycle of chat logs.
+Key Components:
+Indexable Storage: Messages with indexed metadata for fast retrieval
+Topic Classification: LLM-based topic tagging for contextual grouping
+Retention Policy Engine: Configurable rules for data lifecycle management
+Search Index: Full-text search across conversation history
+Technical Requirements:
+Efficient indexing strategy for quick retrieval
+Privacy-preserving vector embeddings
+Configurable retention policies
+Export capabilities for data portability
+4.5 Multi-AI Routing Gateway
+Purpose: Routes messages to the correct AI backend engine.
+Key Components:
+Routing Logic: Identifies message target (Eliza OS or MCP Model)
+Throttling Control: Applies user-specific and model-specific rate limits
+Error Recovery: Implements fallbacks and retries for upstream failures
+Response Normalizer: Standardizes outputs from different AI providers
+Technical Requirements:
+Low-latency routing decisions
+Adaptive rate limiting algorithms
+Graceful degradation during outages
+Support for streaming responses
+4.6 Real-Time Sync Module
+Purpose: Handles all real-time updates and collaboration signals.
+Key Components:
+WebSocket Typing Sync: Notifies frontend when AI is typing
+Agent Sync Feed: Updates sidebar when agents are added/modified
+Session Recovery: Reconnects and restores sessions after disruptions
+Presence Indicators: Shows agent availability status
+Technical Requirements:
+Connection resilience across network changes
+Efficient binary protocols for status updates
+Automatic reconnection with exponential backoff
+State reconciliation after connection restoration
+4.7 Responsive UI Module
+Purpose: Delivers a device-flexible interface with dynamic layout.
+Key Components:
+Responsive Breakpoints: Optimized layouts for mobile, tablet, and desktop
+Resizable Chat Panels: User-adjustable UI components
+Agent-Specific Theming: Dynamic UI styling based on active agent
+Accessibility Layer: WCAG-compliant interface elements
+Technical Requirements:
+Fluid transitions between layout modes
+Memory-efficient DOM rendering
+Touch-optimized interactions for mobile
+Keyboard navigation support
+5. Security & Privacy
+Security and privacy measures are core to the platform's architecture, ensuring user trust, data protection, and operational resilience in commercial deployments.
+Core Guidelines
+End-to-End Encryption: All chat data in transit is encrypted using modern encryption standards such as libsodium or equivalent, ensuring privacy even if intercepted
+Scoped OAuth Permissions: When connecting third-party services, only minimal scopes are requested—typically limited to file upload and read-write to specific folders
+Rate Limiting & Abuse Prevention: Redis is used as the backend throttle controller to detect, rate-limit, and block abuse patterns such as spam, brute force, or model overload
+Offline Model Execution: Local models like Ollama support privacy-first, offline LLM usage for air-gapped environments
+Session Resilience: Built-in reconnection logic ensures smooth recovery from outages or reloads with state retention
+Implementation Requirements
+All security implementations must be auditable
+Authentication logs must be securely stored for audit trails
+Message routing and encryption failures must be tracked
+Proper security headers must be implemented in all API responses
+Regular security scanning must be integrated into CI/CD pipeline
+6. Testing & Maintenance
+Testing Approach
+Component Isolation: Each feature broken into independent, testable units with dedicated test cases
+Integration Coverage: Full test coverage including agent switching, AI routing, storage fallbacks, and typing indicator synchronization
+Error Simulation: Test scenarios including API failures, connection drops, and corrupted session states
+Performance Testing: Verification of system behavior under load and with large conversation histories
+Cross-browser Testing: Validation across modern browsers and device types
+Maintenance Guidelines
+Safe Agent Rollouts: Agent addition/removal handled via upgrade-safe registration hooks with backend toggles
+Version-Controlled Configurations: All system configurations maintained in version-controlled, backward-compatible files
+Automated CI/CD Integration: Pre-deployment checks validating schema consistency and config integrity
+Observability Tools: Comprehensive logging and monitoring for proactive issue detection
+Feature Flags: Controlled rollout of new capabilities with emergency disable options
+7. Frontend-Backend Alignment Strategy
+Strategy Overview
+Frontend experience inspired by NextChat open-source UI
+Backend orchestration driven by Eliza OS
+Loosely coupled integration allows independent evolution
+Reference implementation guidance from https://github.com/ElizaOS/eliza-v2-nextjs-starter 
+MVP Collaboration Approach
+Backend Eliza OS agents maintained in separate repository
+Frontend interacts with agents over defined API endpoints
+Independent evolution with minimum viable integration
+Message Routing Considerations
+Flexible message router interprets UI selections
+MCP selections forwarded to standard model APIs
+Character agent selections routed to Eliza OS endpoints
+Dynamic routing based on metadata (type labels like llm-model or eliza-agent)
+Structural Flexibility
+No fixed folder or monorepo structure mandated
+Implementation team determines best modularization approach
+Focus on speed, simplicity, and extensibility
+Reusable frontend across different backends
+8. Deployment Strategy
+The system is designed to be deployment-flexible, supporting a variety of operational contexts ranging from developer testing environments to production-scale rollout.
+Preferred Deployment Modes
+Vercel: Ideal for serverless deployments with automatic scaling, minimal setup, and developer-friendly CI/CD
+Docker: Maximum control and portability for custom infrastructure or behind firewalls
+Zeabur: Managed serverless platform with built-in observability and auto-scaling
+Local Testing & Development
+Local frontend using Next.js dev server with independent backend or mocks
+Isolated testing with mocked models or local Ollama instance
+Support for rapid prototyping and debugging
+Configuration and Secret Management
+Sensitive configuration injected through secure environment variables
+No hardcoded secrets or credentials in repository
+.env.example template documenting required variables
+Environment-specific configurations for staging and production
+Required Environment Variables
+OPENAI_API_KEY=
+AZURE_URL=
+GOOGLE_API_KEY=
+OLLAMA_API_KEY=
+REDIS_URL=
+POSTGRES_URL=
+JWT_SECRET=
+9. Licensing & Compliance
+This product is being developed for full commercial deployment with strict adherence to licensing best practices.
+Guidelines for License Compliance
+Permitted Licenses: Only MIT, Apache-2.0, or BSD-style open-source licenses
+Prohibited Licenses: GPL, AGPL, Creative Commons Non-Commercial (CC-NC), or any license restricting commercial distribution
+Evaluation Process: All third-party packages must be evaluated during integration
+Internal Audit Requirements
+No transitive dependencies introducing restricted licenses
+Licensing files and headers retained with proper attribution
+Regular dependency scanning for license compliance
+Recommended Ecosystems
+LobeHub: Modular UI, LLM utilities, and productivity tools
+Ollama: Local model execution and AI privacy
+NextChat: Next.js-based open platform with clear license
+Zustand: Lightweight state manager
+Ant Design: Professional React UI framework under MIT
+10. Frontend-Backend Integration with Eliza OS and MCP Routing
+Key Integration Considerations
+Dual-routing mechanism supporting both Eliza OS agents and Model Control Panel (MCP) selection
+Dynamic Agent Display showing Eliza OS-based agents in dropdown using backend configuration
+Message Routing through handler distinguishing between Eliza OS and standard LLM-based agents
+Agent Router Layer abstracting switching between ElizaOS and other AI providers
+Session Binding with unique session IDs and persistent memory contexts
+Persona Sync reflecting updated character files in frontend
+Dropdown Interface Requirements
+Agent Selection Mode: Persona-driven agents routed to Eliza OS with persistent memory and dynamic behavioral responses
+Model Selection Mode (MCP): Raw LLM models bypassing Eliza OS and flowing directly to API endpoints
+Frontend Component Requirements:
+Dynamic separation of agents vs. model options
+Internal tagging with eliza-agent or llm-model types
+Updated router logic for execution path determination
+Integration Modularity
+Seamless switching without UI reload or context disruption
+Modularized logic for future extensibility
+Clear API contracts between frontend and backend components
+Support for streaming responses from all providers
+11. 0G Storage Integration for Decentralized Web3 Data Storage
+Integration Guidelines
+Architecture Choice: 0G storage complementing traditional storage options for Web3-native experience
+Authentication: Wallet-based authentication and authorization for permissionless access
+Data Upload Workflow: Content packaging, secure signing, root hash generation, and decentralized publishing
+Metadata Management: Storage of root hashes and related metadata in main database
+Content Retrieval: Seamless pulling of files from 0G network via stored hashes
+SDK Integration Resources
+TypeScript SDK: https://github.com/0glabs/0g-storage-ts-starter-kit
+Storage SDK Documentation: https://docs.0g.ai/build-with-0g/storage-sdk
+CLI Tools: https://docs.0g.ai/build-with-0g/storage-cli
+Security & Privacy Considerations
+Content-addressable and cryptographically verifiable data
+Pre-upload encryption for sensitive information
+User education about public nature of decentralized storage
+Optional encryption for privacy-sensitive content
+12. Forking Instructions
+To accelerate development, this project will fork from proven open-source bases:
+Frontend Base: https://github.com/ChatGPTNextWeb/NextChat – Provides a stable, extensible Next.js-based chat interface
+Backend Base: https://github.com/ElizaOS/eliza – A lightweight orchestration and memory management system
+Eliza Characters: https://github.com/elizaOS/characterfile – Ready-to-use persona templates
+Eliza Resources: https://github.com/elizaOS/awesome-eliza – Curated list of tools and best practices
+Eliza Starter kit : This is a very useful repo here for eliza agent integration, https://github.com/ElizaOS/eliza-v2-nextjs-starter 
+All forks must comply with original licenses and carry proper documentation of changes for transparency and maintainability.
+13. A few possible API Contract
+Core Endpoints
+/api/agents
+
+
+GET: Retrieve available agents with metadata
+POST: Register new agent (admin only)
+PUT: Update agent configuration (admin only)
+/api/chat/:agentId
+
+
+POST: Send message to specific agent
+GET: Retrieve conversation history for agent
+/api/storage
+
+
+GET: List connected storage providers
+POST: Connect new storage provider
+DELETE: Remove storage connection
+/api/auth
+
+
+POST /login: Authenticate user
+POST /refresh: Refresh authentication token
+GET /providers: List available OAuth providers
+WebSocket Events
+agent:update - Broadcasts agent registry changes
+typing:status - Provides real-time typing indicators
+message:new - Notifies of new messages
+connection:state - Reports connection health status
+14. Future Enhancements (Post-MVP)
+The following features are planned for development after the MVP release:
+Voice-to-text AI input: Integration with Lobe TTS or Whisper for speech recognition
+AI Image Generation Assistant: Stable Diffusion integration for visual content creation
+Auto-summary and translation agents: Specialized agents for content processing
+Workspace collaboration mode: Multi-user environments with shared context
+Prompt templates and custom fine-tuned agents: User-configurable agent specialization
+15. Development Standards
+Code Quality
+Linting: ESLint with strict configuration
+Formatting: Prettier for consistent code style
+Type Safety: TypeScript with strict mode enabled
+Testing: Jest for unit tests, Cypress for E2E testing
+Git Workflow
+Branch Strategy: Feature branches with descriptive names
+PR Process: Required reviews and CI checks
+Commit Style: Conventional commits (feat:, fix:, docs:, etc.)
+Release Management: Semantic versioning with changelogs
+Documentation
+API Docs: OpenAPI/Swagger for all endpoints
+Component Docs: Storybook for UI components
+Architecture: Updated diagrams for major changes
+User Guides: In-app help and external documentation
+16. Internal Developer & QA Readme Guide
+This section is the requirement to write a mandatory quick-start onboarding reference for internal developers, testers, and QA engineers involved in the MVP release.
+Purpose
+To align internal teams on setup, testing, and contribution expectations without diving into source code.
+Project Structure Overview
+Frontend: Forked or modularly inspired by NextChat
+Backend: Runs Eliza OS agent infrastructure from ElizaOS
+Optional Integration: eliza-agent folder can be introduced for custom adapters if embedded
+Setup Instructions (Local MVP Testing)
+Clone frontend repository and install dependencies (pnpm install or npm install)
+Clone Eliza OS backend agent in a separate folder/repo
+Set up .env file from .env.example
+Run frontend locally using Next.js dev mode
+Ensure backend Eliza OS agent is accessible via API
+Trigger agent/model routing by selecting agent from dropdown
+Testing Focus Areas
+Message routing accuracy (agent vs. model)
+Agent switching and memory persistence
+File upload and storage integrations (0G, Drive, Dropbox)
+UI responsiveness (desktop, tablet, mobile)
+Auto-saving, scroll sync, typing indicators
+Contribution Guidelines
+All commits should follow clean formatting and linting rules
+Backend API structure must not be broken during Eliza integration
+Any new agent added should be documented (metadata, icon, endpoint)
+Known Areas of Ongoing Work
+Agent router modularity
+elizaAgentBridge.ts for dynamic Eliza persona handling
+Improved MCP selection logic
+Integration testing (Redis, Postgres, API timeouts)
+
+
+
+This specification document serves as the authoritative reference for the Multi-Agent Chatbox MVP development. All implementation decisions must align with the architecture, principles, and requirements outlined herein.
+

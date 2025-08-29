@@ -136,6 +136,11 @@ export class ClientApi {
   public llm: LLMApi;
 
   constructor(provider: ModelProvider = ModelProvider.GPT) {
+    if (provider === ModelProvider.Eliza) {
+      const { ElizaAgentApi } = require("./elizaAgentBridge");
+      this.llm = new ElizaAgentApi();
+      return;
+    }
     switch (provider) {
       case ModelProvider.GeminiPro:
         this.llm = new GeminiProApi();

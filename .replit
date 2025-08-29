@@ -1,0 +1,59 @@
+modules = ["nodejs-20", "rust-stable", "bash"]
+run = "npm run dev"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "npm run dev"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 3001
+externalPort = 3001
+
+[[ports]]
+localPort = 3002
+externalPort = 3002
+
+[workflows]
+runButton = "Frontend Dev"
+
+[[workflows.workflow]]
+name = "ElizaOS Agent"
+author = 38599256
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -m elizaos.server --host 0.0.0.0 --port 5000 --allow-models eliza-researcher,eliza-coder,eliza-designer"
+
+[[workflows.workflow]]
+name = "ElizaOS"
+author = 38599256
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+
+[[workflows.workflow]]
+name = "ElizaOS Backend"
+author = 38599256
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 -m elizaos.server --host 0.0.0.0 --port 5000 --allow-models eliza-researcher"
+
+[[workflows.workflow]]
+name = "Frontend Dev"
+author = 38599256
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"

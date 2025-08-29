@@ -125,6 +125,7 @@ import { getModelProvider } from "../utils/model";
 import { RealtimeChat } from "@/app/components/realtime-chat";
 import clsx from "clsx";
 import { getAvailableClientsCount, isMcpEnabled } from "../mcp/actions";
+import { StorageSelector } from "./storage-selector";
 
 const localStorage = safeLocalStorage();
 
@@ -1435,6 +1436,8 @@ function _Chat() {
       : -1;
 
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [showStorageModal, setShowStorageModal] = useState(false);
+  const [selectedContent, setSelectedContent] = useState("");
 
   const clientConfig = useMemo(() => getClientConfig(), []);
 
@@ -1913,6 +1916,16 @@ function _Chat() {
                                           )
                                         }
                                       />
+                                      <ChatAction
+                                        text="Save"
+                                        icon={<ExportIcon />}
+                                        onClick={() => {
+                                          setSelectedContent(
+                                            getMessageTextContent(message),
+                                          );
+                                          setShowStorageModal(true);
+                                        }}
+                                      />
                                       {config.ttsConfig.enable && (
                                         <ChatAction
                                           text={
@@ -2159,6 +2172,12 @@ function _Chat() {
 
       {showShortcutKeyModal && (
         <ShortcutKeyModal onClose={() => setShowShortcutKeyModal(false)} />
+      )}
+      {showStorageModal && (
+        <StorageSelector
+          content={selectedContent}
+          onClose={() => setShowStorageModal(false)}
+        />
       )}
     </>
   );

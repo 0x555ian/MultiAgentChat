@@ -141,8 +141,11 @@ export const TTSConfigValidator = {
 };
 
 export const ModalConfigValidator = {
-  model(x: string) {
-    return x as ModelType;
+  model(model: string) {
+    if (model.startsWith("eliza-")) {
+      return model;
+    }
+    return model;
   },
   max_tokens(x: number) {
     return limitNumber(x, 0, 512000, 1024);

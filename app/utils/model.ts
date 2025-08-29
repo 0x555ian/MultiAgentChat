@@ -83,6 +83,24 @@ export function collectModelTable(
         m.startsWith("+") || m.startsWith("-") ? m.slice(1) : m;
       let [name, displayName] = nameConfig.split("=");
 
+      // Add ElizaOS agents first
+      const elizaAgents = ["eliza-coder", "eliza-researcher", "eliza-designer"];
+      elizaAgents.forEach((agent) => {
+        modelTable[agent] = {
+          name: agent,
+          displayName: `ElizaOS ${
+            agent.split("-")[1].charAt(0).toUpperCase() +
+            agent.split("-")[1].slice(1)
+          } Assistant`,
+          available: true,
+          provider: {
+            id: "elizaos",
+            providerName: "ElizaOS",
+            providerType: "elizaos",
+          },
+        };
+      });
+
       // enable or disable all models
       if (name === "all") {
         Object.values(modelTable).forEach(

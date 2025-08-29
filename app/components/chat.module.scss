@@ -340,7 +340,7 @@
     box-sizing: border-box;
     font-size: 12px;
     align-items: flex-end;
-    justify-content: space-between;
+    justify-content: flex-end; /* Modified line to address potential autoprefixer warning */
     transition: all ease 0.3s;
     transform: scale(0.9) translateY(5px);
     margin: 0 10px;
